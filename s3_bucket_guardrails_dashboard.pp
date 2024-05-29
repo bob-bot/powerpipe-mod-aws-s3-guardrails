@@ -2,9 +2,6 @@ dashboard "s3_bucket_dashboard" {
 
   title         = "AWS S3 Bucket Guardrails Dashboard"
 
-  tags = merge(local.s3_common_tags, {
-    type = "Dashboard"
-  })
 
   container {
      title = "Guardrails Controls"
@@ -18,25 +15,21 @@ dashboard "s3_bucket_dashboard" {
     card {
       query = query.s3_bucket_public_block_count
       width = 2
-      href  = dashboard.s3_bucket_public_access_report.url_path
     }
 
     card {
       query = query.s3_bucket_unencrypted_count
       width = 2
-      href  = dashboard.s3_bucket_encryption_report.url_path
     }
 
     card {
       query = query.s3_bucket_logging_disabled_count
       width = 2
-      href  = dashboard.s3_bucket_logging_report.url_path
     }
 
     card {
       query = query.s3_bucket_versioning_disabled_count
       width = 2
-      href  = dashboard.s3_bucket_lifecycle_report.url_path
     }
 
     # Costs
@@ -202,7 +195,12 @@ dashboard "s3_bucket_dashboard" {
 
 query "s3_bucket_count" {
   sql = <<-EOQ
-    select count(*) as "Buckets" from guardrails_resource where filter = 'resourceTypeId:tmod:@turbot/aws-s3#/resource/types/bucket';
+    select 
+        count(*) as "Buckets" 
+    from 
+        guardrails_resource 
+    where 
+        filter = 'resourceTypeId:tmod:@turbot/aws-s3#/resource/types/bucket';
   EOQ
 }
 
@@ -213,7 +211,7 @@ query "s3_bucket_versioning_disabled_count" {
       'Versioning' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      guardrails.guardrails_control
+      guardrails_control
     where
       filter = 'controlTypeId:"tmod:@turbot/aws-s3#/control/types/bucketVersioning" state:alarm';
   EOQ
@@ -226,7 +224,7 @@ query "s3_bucket_unencrypted_count" {
       'Encryption at Rest' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      guardrails.guardrails_control
+      guardrails_control
     where
       filter = 'controlTypeId:"tmod:@turbot/aws-s3#/control/types/bucketEncryptionAtRest" state:alarm';
   EOQ
@@ -239,7 +237,7 @@ query "s3_bucket_public_block_count" {
       'Public Access Block' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      guardrails.guardrails_control
+      guardrails_control
     where
       filter = 'controlTypeId:"tmod:@turbot/aws-s3#/control/types/bucketLevelPublicAccessBlock" state:alarm';
   EOQ
@@ -252,7 +250,7 @@ query "s3_bucket_logging_disabled_count" {
       'Access Logging' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      guardrails.guardrails_control
+      guardrails_control
     where
       filter = 'controlTypeId:"tmod:@turbot/aws-s3#/control/types/bucketAccessLogging" state:alarm';
   EOQ

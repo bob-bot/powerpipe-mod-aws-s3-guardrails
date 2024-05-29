@@ -273,21 +273,13 @@ query "s3_bucket_cost_mtd" {
 
 query "s3_bucket_versioning_status" {
   sql = <<-EOQ
-    with versioning_status as (
-      select
-        case
-          when versioning_enabled then 'enabled' else 'disabled'
-        end as visibility
-      from
-        aws_s3_bucket
-    )
-    select
-      visibility,
-      count(*)
-    from
-      versioning_status
-    group by
-      visibility;
+select
+  (select count(*) 
+   from guardrails_resource 
+   where filter = 'resourceTypeId:"tmod:@turbot/aws-s3#/resource/types/bucket" $.Versioning.Status:Enabled') as enabled,
+  (select count(*) 
+   from guardrails_resource 
+   where filter = 'resourceTypeId:"tmod:@turbot/aws-s3#/resource/types/bucket" $.Versioning.Status:Suspended') as disabled
   EOQ
 }
 
